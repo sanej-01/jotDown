@@ -1,0 +1,33 @@
+/*
+ * Design tokens derived from the Jot prototype (light + dark).
+ * Values are space-separated RGB channels so Tailwind's `<alpha-value>` works
+ * (see tailwind.config.js). The `.dark` class on <html> swaps the palette.
+ */
+
+:root {
+  --jot-canvas: 245 244 239;
+  --jot-surface: 255 255 255;
+  --jot-surface-muted: 238 236 230;
+  --jot-border: 226 224 216;
+  --jot-content: 47 46 43;
+  --jot-content-muted: 138 136 128;
+  --jot-brand: 120 140 102;
+  --jot-brand-strong: 95 115 80;
+  --jot-brand-soft: 169 184 146;
+  --jot-danger: 192 86 63;
+  --jot-warning: 217 154 43;
+}
+
+.dark {
+  --jot-canvas: 38 36 33;
+  --jot-surface: 48 46 42;
+  --jot-surface-muted: 58 56 51;
+  --jot-border: 69 66 60;
+  --jot-content: 236 233 227;
+  --jot-content-muted: 156 152 143;
+  --jot-brand: 143 161 118;
+  --jot-brand-strong: 169 184 146;
+  --jot-brand-soft: 74 85 64;
+  --jot-danger: 217 118 95;
+  --jot-warning: 224 169 68;
+}
