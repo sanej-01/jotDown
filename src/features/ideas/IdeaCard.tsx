@@ -29,12 +29,13 @@ export function IdeaCard({ idea, onEditTitle, onEditNote, onDelete }: IdeaCardPr
     <li className="rounded-card border border-border bg-surface px-4 py-3">
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <div className="font-semibold text-content">
-            <EditableText
-              value={idea.title}
-              onSave={(title) => onEditTitle(idea.id, title)}
-            />
-          </div>
+          <EditableText
+            value={idea.title}
+            onSave={(title) => onEditTitle(idea.id, title)}
+            multiline
+            displayLines={2}
+            editRows={5}
+          />
 
           {expanded && (
             <textarea
