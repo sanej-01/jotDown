@@ -18,11 +18,11 @@ export function AuthScreen({ children }: { children: ReactNode }) {
           <img
             src="/logo.png"
             alt=""
-            width={96}
-            height={96}
-            className="h-24 w-24 select-none"
+            width={110}
+            height={110}
+            className="h-[110px] w-[110px] select-none"
           />
-          <Brand withTagline className="mt-4" />
+          <Brand withTagline large className="mt-4" />
         </div>
 
         <div className="mt-8 flex flex-col gap-3">{children}</div>
