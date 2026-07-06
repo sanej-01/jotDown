@@ -51,14 +51,13 @@ export function DueDateControl({ dueDate, onChange }: DueDateControlProps) {
         </button>
       )}
 
-      {/* Real date input, visually hidden but focusable/pickerable. */}
+      {/* Real date input, positioned absolutely and made invisible but accessible for native picker. */}
       <input
         ref={inputRef}
         type="date"
         value={dueDate ?? ''}
         onChange={(e) => onChange(e.target.value || null)}
-        className="pointer-events-none absolute bottom-0 right-0 h-0 w-0 opacity-0"
-        tabIndex={-1}
+        className="absolute inset-0 cursor-pointer opacity-0"
         aria-hidden
       />
     </div>
