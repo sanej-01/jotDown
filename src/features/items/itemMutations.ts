@@ -4,6 +4,7 @@ import { itemsRepo } from '@/data/items.repo';
 import { optimisticList } from '@/lib/optimistic';
 import { appendOrder, orderBetween } from '@/lib/sortOrder';
 import { clampNote, clampTitle, isNonEmpty } from '@/lib/validation';
+import { qk } from '@/lib/queryKeys';
 import type { Item, ItemType } from '@/types/database';
 
 /**
@@ -26,9 +27,21 @@ function bySortOrder(a: Item, b: Item): number {
   return a.sort_order - b.sort_order;
 }
 
+/**
+ * List entries feed the "N of M done" counts cached under qk.lists (the Lists
+ * overview screen). That query is separate from qk.listEntries(listId), so
+ * mutations that change an entry's total/done count must invalidate it too,
+ * or the overview page shows stale counts after editing inside a list.
+ * Todos don't affect those counts, so this is a no-op for them.
+ */
+function invalidateListCountsIfEntry(qc: ReturnType<typeof useQueryClient>, scope: ItemScope) {
+  if (scope.type === 'list_entry') void qc.invalidateQueries({ queryKey: qk.lists });
+}
+
 /** Add a new todo / list entry (appended to the end). */
 export function useAddItem(scope: ItemScope) {
   const qc = useQueryClient();
+  const sync = optimisticList<Item, Item>(qc, scope.queryKey, (cur, row) => [...cur, row]);
   const mutation = useMutation({
     mutationFn: (row: Item) =>
       itemsRepo.insert({
@@ -41,7 +54,11 @@ export function useAddItem(scope: ItemScope) {
         due_date: row.due_date,
         sort_order: row.sort_order,
       }),
-    ...optimisticList<Item, Item>(qc, scope.queryKey, (cur, row) => [...cur, row]),
+    ...sync,
+    onSettled: () => {
+      sync.onSettled();
+      invalidateListCountsIfEntry(qc, scope);
+    },
   });
 
   const add = useCallback(
@@ -77,11 +94,16 @@ export function useAddItem(scope: ItemScope) {
 /** Toggle done/undone. */
 export function useToggleItem(scope: ItemScope) {
   const qc = useQueryClient();
+  const sync = optimisticList<Item, { id: string; done: boolean }>(qc, scope.queryKey, (cur, v) =>
+    cur.map((i) => (i.id === v.id ? { ...i, done: v.done } : i)),
+  );
   const mutation = useMutation({
     mutationFn: (v: { id: string; done: boolean }) => itemsRepo.update(v.id, { done: v.done }),
-    ...optimisticList<Item, { id: string; done: boolean }>(qc, scope.queryKey, (cur, v) =>
-      cur.map((i) => (i.id === v.id ? { ...i, done: v.done } : i)),
-    ),
+    ...sync,
+    onSettled: () => {
+      sync.onSettled();
+      invalidateListCountsIfEntry(qc, scope);
+    },
   });
   const toggle = useCallback(
     (item: Item) => mutation.mutate({ id: item.id, done: !item.done }),
@@ -163,11 +185,16 @@ export function useReorderItem(scope: ItemScope) {
 /** Soft-delete a single item (undo handled by useRestoreItem). */
 export function useDeleteItem(scope: ItemScope) {
   const qc = useQueryClient();
+  const sync = optimisticList<Item, string>(qc, scope.queryKey, (cur, id) =>
+    cur.filter((i) => i.id !== id),
+  );
   const mutation = useMutation({
     mutationFn: (id: string) => itemsRepo.softDelete(id),
-    ...optimisticList<Item, string>(qc, scope.queryKey, (cur, id) =>
-      cur.filter((i) => i.id !== id),
-    ),
+    ...sync,
+    onSettled: () => {
+      sync.onSettled();
+      invalidateListCountsIfEntry(qc, scope);
+    },
   });
   const remove = useCallback((item: Item) => mutation.mutate(item.id), [mutation]);
   return { ...mutation, remove };
@@ -176,11 +203,16 @@ export function useDeleteItem(scope: ItemScope) {
 /** Restore a soft-deleted item to its original position (undo of delete). */
 export function useRestoreItem(scope: ItemScope) {
   const qc = useQueryClient();
+  const sync = optimisticList<Item, Item>(qc, scope.queryKey, (cur, item) =>
+    [...cur.filter((i) => i.id !== item.id), item].sort(bySortOrder),
+  );
   const mutation = useMutation({
     mutationFn: (item: Item) => itemsRepo.restore(item.id),
-    ...optimisticList<Item, Item>(qc, scope.queryKey, (cur, item) =>
-      [...cur.filter((i) => i.id !== item.id), item].sort(bySortOrder),
-    ),
+    ...sync,
+    onSettled: () => {
+      sync.onSettled();
+      invalidateListCountsIfEntry(qc, scope);
+    },
   });
   const restore = useCallback((item: Item) => mutation.mutate(item), [mutation]);
   return { ...mutation, restore };

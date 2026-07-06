@@ -43,19 +43,31 @@ export function useListEntryActions(listId: string) {
   const { restore } = useRestoreItem(scope);
 
   // Clear completed: soft-delete all done entries as one undoable action.
+  // Also invalidate qk.lists: clearing changes this list's total/done counts
+  // on the Lists overview screen, which is a separate query cache.
+  const clearSync = optimisticList<Item, string[]>(qc, scope.queryKey, (cur, ids) => {
+    const gone = new Set(ids);
+    return cur.filter((i) => !gone.has(i.id));
+  });
   const clearMutation = useMutation({
     mutationFn: (ids: string[]) => itemsRepo.softDeleteMany(ids),
-    ...optimisticList<Item, string[]>(qc, scope.queryKey, (cur, ids) => {
-      const gone = new Set(ids);
-      return cur.filter((i) => !gone.has(i.id));
-    }),
+    ...clearSync,
+    onSettled: () => {
+      clearSync.onSettled();
+      void qc.invalidateQueries({ queryKey: qk.lists });
+    },
   });
 
+  const restoreClearedSync = optimisticList<Item, Item[]>(qc, scope.queryKey, (cur, items) =>
+    [...cur, ...items].sort((a, b) => a.sort_order - b.sort_order),
+  );
   const restoreClearedMutation = useMutation({
     mutationFn: (items: Item[]) => itemsRepo.restoreMany(items.map((i) => i.id)),
-    ...optimisticList<Item, Item[]>(qc, scope.queryKey, (cur, items) =>
-      [...cur, ...items].sort((a, b) => a.sort_order - b.sort_order),
-    ),
+    ...restoreClearedSync,
+    onSettled: () => {
+      restoreClearedSync.onSettled();
+      void qc.invalidateQueries({ queryKey: qk.lists });
+    },
   });
 
   /** Clears done entries; resolves with the cleared items for undo. */
