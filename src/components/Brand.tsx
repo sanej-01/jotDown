@@ -2,18 +2,22 @@ interface BrandProps {
   /** Show the tagline under the wordmark (used on the auth screens). */
   withTagline?: boolean;
   className?: string;
+  /** Increase text size by 20% (used on auth screens). */
+  large?: boolean;
 }
 
 /** The "jotdown" wordmark, optionally with the tagline. */
-export function Brand({ withTagline = false, className = '' }: BrandProps) {
+export function Brand({ withTagline = false, className = '', large = false }: BrandProps) {
+  const textSize = large ? 'text-[1.65rem]' : 'text-2xl';
+  const taglineGap = large ? 'mt-0' : 'mt-1';
   return (
     <div className={className}>
-      <span className="text-2xl font-extrabold tracking-tight">
+      <span className={`${textSize} font-extrabold tracking-tight`}>
         <span className="text-brand-strong">jot</span>
         <span className="text-content">down</span>
       </span>
       {withTagline && (
-        <p className="mt-1 text-sm text-content-muted">catch it b4 it's gone</p>
+        <p className={`${taglineGap} text-sm text-content-muted`}>catch it b4 it's gone</p>
       )}
     </div>
   );

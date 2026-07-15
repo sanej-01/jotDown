@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { RequireAuth } from '@/features/auth/RequireAuth';
-import { LoginPage } from '@/features/auth/LoginPage';
-import { SignupPage } from '@/features/auth/SignupPage';
+import { AuthPage } from '@/features/auth/AuthPage';
 import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { AppLayout } from '@/components/AppLayout';
@@ -21,8 +20,8 @@ export default function App() {
   return (
     <Routes>
       {/* Public auth routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
+      <Route path="/login" element={<AuthPage />} />
+      <Route path="/signup" element={<AuthPage />} />
       <Route path="/forgot" element={<ForgotPasswordPage />} />
       <Route path="/reset" element={<ResetPasswordPage />} />
 
