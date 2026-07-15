@@ -33,36 +33,42 @@ export function DueDateControl({ dueDate, onChange }: DueDateControlProps) {
 
   return (
     <div className="group relative shrink-0">
-      {/* Decorative badge — visual only; the input on top handles all interaction. */}
-      {dueDate ? (
-        <span
-          aria-hidden
-          className={[
-            'block rounded-pill border px-2.5 py-1 text-xs font-medium',
-            overdue ? 'border-danger/40 text-danger' : 'border-border text-content-muted',
-          ].join(' ')}
-        >
-          {dueLabel(dueDate)}
-        </span>
-      ) : (
-        <span
-          aria-hidden
-          className="flex h-9 w-9 items-center justify-center rounded-full text-content-muted transition-colors group-hover:bg-surface-muted group-hover:text-content"
-        >
-          <CalendarIcon className="h-4 w-4" />
-        </span>
-      )}
+      {/* Clickable badge — receives tap/click events and opens the date picker.
+          On iOS, pointer-events on the invisible input below was interfering with
+          sibling buttons (like delete), so we make the visible element clickable
+          and use pointer-events: none on the input. */}
+      <button
+        type="button"
+        onClick={openPicker}
+        aria-label={dueDate ? `Due ${dueLabel(dueDate)}. Change or clear due date` : 'Set due date'}
+        className="relative flex cursor-pointer items-center justify-center focus-visible:outline-none"
+      >
+        {dueDate ? (
+          <span
+            className={[
+              'block rounded-pill border px-2.5 py-1 text-xs font-medium',
+              overdue ? 'border-danger/40 text-danger' : 'border-border text-content-muted',
+            ].join(' ')}
+          >
+            {dueLabel(dueDate)}
+          </span>
+        ) : (
+          <span className="flex h-9 w-9 items-center justify-center rounded-full text-content-muted transition-colors group-hover:bg-surface-muted group-hover:text-content">
+            <CalendarIcon className="h-4 w-4" />
+          </span>
+        )}
+      </button>
 
-      {/* Real date input, stretched over the badge so every click/tap in the
-          control's full area opens the picker, not just a narrow hotspot. */}
+      {/* Real date input, hidden with pointer-events: none so it doesn't interfere
+          with other interactive elements (like delete buttons). It still processes
+          keyboard input and value changes, but touch/pointer events are ignored. */}
       <input
         ref={inputRef}
         type="date"
         value={dueDate ?? ''}
         onChange={(e) => onChange(e.target.value || null)}
-        onClick={openPicker}
-        aria-label={dueDate ? `Due ${dueLabel(dueDate)}. Change or clear due date` : 'Set due date'}
-        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
       />
     </div>
   );
