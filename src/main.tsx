@@ -1,3 +1,4 @@
+// Jotdown entry point: sets up React root, query client, theme, auth, and routing.
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

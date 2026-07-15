@@ -23,7 +23,6 @@ interface AuthContextValue {
   user: User | null;
   signInWithPassword: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string) => Promise<AuthResult>;
-  signInWithMagicLink: (email: string) => Promise<AuthResult>;
   sendPasswordReset: (email: string) => Promise<AuthResult>;
   updatePassword: (newPassword: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
@@ -75,14 +74,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // email" disabled in Supabase, this returns an active session directly.
       async signUp(email, password) {
         const { error } = await supabase.auth.signUp({ email, password });
-        return { error: friendlyAuthError(error) };
-      },
-
-      async signInWithMagicLink(email) {
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: { emailRedirectTo: `${window.location.origin}/todos` },
-        });
         return { error: friendlyAuthError(error) };
       },
 

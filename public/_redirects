@@ -1,0 +1,4 @@
+# SPA fallback: serve index.html for all client-side routes so a page
+# refresh on a deep link (e.g. /todos, /lists/:id) doesn't 404.
+# Used by Netlify, Cloudflare Pages, and compatible static hosts.
+/*    /index.html   200
