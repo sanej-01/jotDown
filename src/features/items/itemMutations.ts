@@ -77,6 +77,7 @@ export function useAddItem(scope: ItemScope) {
         done: false,
         due_date: extra?.dueDate ?? null,
         sort_order: appendOrder(current),
+        color: 'yellow',
         created_at: now,
         updated_at: now,
         deleted_at: null,

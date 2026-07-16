@@ -7,6 +7,9 @@
 
 export type ItemType = 'todo' | 'idea' | 'list_entry';
 
+/** Color label for ideas. Default is yellow. */
+export type IdeaColor = 'red' | 'yellow' | 'blue';
+
 /** A row in the `items` table (todos, ideas, and entries inside a list). */
 export interface Item {
   id: string;
@@ -26,6 +29,8 @@ export interface Item {
   updated_at: string;
   /** Soft-delete marker. Non-null rows are hidden from every view. */
   deleted_at: string | null;
+  /** Color label for ideas ('red' | 'yellow' | 'blue'). Default 'yellow'. */
+  color: IdeaColor;
 }
 
 /** A row in the `lists` table. */

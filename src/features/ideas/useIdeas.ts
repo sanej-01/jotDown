@@ -9,7 +9,7 @@ import {
   useRestoreItem,
   type ItemScope,
 } from '@/features/items/itemMutations';
-import type { Item } from '@/types/database';
+import type { IdeaColor, Item } from '@/types/database';
 
 const ideaScope: ItemScope = { queryKey: qk.ideas, type: 'idea', listId: null };
 
@@ -33,6 +33,7 @@ export function useAddIdea() {
         title: row.title,
         note: row.note,
         sort_order: row.sort_order,
+        color: row.color,
       }),
     // Prepend: ideas are shown newest-first.
     ...optimisticList<Item, Item>(qc, qk.ideas, (cur, row) => [row, ...cur]),
@@ -52,6 +53,7 @@ export function useAddIdea() {
         done: false,
         due_date: null,
         sort_order: 0,
+        color: 'yellow',
         created_at: now,
         updated_at: now,
         deleted_at: null,
@@ -68,12 +70,13 @@ export function useAddIdea() {
 export function useEditIdea() {
   const qc = useQueryClient();
   const mutation = useMutation({
-    mutationFn: (v: { id: string; title?: string; note?: string }) =>
+    mutationFn: (v: { id: string; title?: string; note?: string; color?: IdeaColor }) =>
       itemsRepo.update(v.id, {
         ...(v.title !== undefined ? { title: clampTitle(v.title) } : {}),
         ...(v.note !== undefined ? { note: clampNote(v.note) } : {}),
+        ...(v.color !== undefined ? { color: v.color } : {}),
       }),
-    ...optimisticList<Item, { id: string; title?: string; note?: string }>(
+    ...optimisticList<Item, { id: string; title?: string; note?: string; color?: IdeaColor }>(
       qc,
       qk.ideas,
       (cur, v) =>
@@ -83,6 +86,7 @@ export function useEditIdea() {
                 ...i,
                 ...(v.title !== undefined ? { title: clampTitle(v.title) } : {}),
                 ...(v.note !== undefined ? { note: clampNote(v.note) } : {}),
+                ...(v.color !== undefined ? { color: v.color } : {}),
               }
             : i,
         ),
@@ -90,7 +94,7 @@ export function useEditIdea() {
   });
 
   const edit = useCallback(
-    (id: string, patch: { title?: string; note?: string }) => {
+    (id: string, patch: { title?: string; note?: string; color?: IdeaColor }) => {
       // Don't wipe a title to empty; a blank note is allowed.
       if (patch.title !== undefined && !isNonEmpty(patch.title)) return;
       mutation.mutate({ id, ...patch });
