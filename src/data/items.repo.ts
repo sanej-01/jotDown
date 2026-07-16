@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { unwrap } from '@/lib/errors';
-import type { Item, ItemType } from '@/types/database';
+import type { IdeaColor, Item, ItemType } from '@/types/database';
 
 /**
  * Data-access layer for the `items` table (todos, ideas, and list entries).
@@ -23,11 +23,12 @@ export interface NewItem {
   done?: boolean;
   due_date?: string | null;
   sort_order: number;
+  color?: IdeaColor;
 }
 
 /** Fields that can be patched on an existing item. */
 export type ItemPatch = Partial<
-  Pick<Item, 'title' | 'note' | 'done' | 'due_date' | 'sort_order'>
+  Pick<Item, 'title' | 'note' | 'done' | 'due_date' | 'sort_order' | 'color'>
 >;
 
 const TABLE = 'items';
@@ -75,6 +76,7 @@ export const itemsRepo = {
         done: item.done ?? false,
         due_date: item.due_date ?? null,
         sort_order: item.sort_order,
+        color: item.color ?? 'yellow',
       })
       .select()
       .single();

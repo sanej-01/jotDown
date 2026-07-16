@@ -75,6 +75,7 @@ export function IdeasPage() {
                 idea={idea}
                 onEditTitle={(id, title) => edit(id, { title })}
                 onEditNote={(id, note) => edit(id, { note })}
+                onEditColor={(id, color) => edit(id, { color })}
                 onDelete={handleDelete}
               />
             ))}
