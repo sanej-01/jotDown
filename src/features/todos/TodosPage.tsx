@@ -33,11 +33,7 @@ export function TodosPage() {
   const isEmpty = open.length === 0 && done.length === 0;
 
   return (
-    <section aria-labelledby="todos-heading">
-      <h1 id="todos-heading" className="mb-3 text-sm font-medium text-content-muted">
-        Todos
-      </h1>
-
+    <section aria-label="Todos">
       <AddInput placeholder="Add a task…" ariaLabel="Add a task" onAdd={add} autoFocus />
 
       <QueryState

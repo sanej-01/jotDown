@@ -12,11 +12,7 @@ export function ListsPage() {
   const items = lists.data ?? [];
 
   return (
-    <section aria-labelledby="lists-heading">
-      <h1 id="lists-heading" className="mb-3 text-sm font-medium text-content-muted">
-        Lists
-      </h1>
-
+    <section aria-label="Lists">
       <AddInput
         placeholder="New list…"
         ariaLabel="New list name"

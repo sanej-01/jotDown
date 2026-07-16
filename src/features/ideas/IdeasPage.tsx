@@ -36,11 +36,7 @@ export function IdeasPage() {
   const hasIdeas = (ideas.data ?? []).length > 0;
 
   return (
-    <section aria-labelledby="ideas-heading">
-      <h1 id="ideas-heading" className="mb-3 text-sm font-medium text-content-muted">
-        Ideas
-      </h1>
-
+    <section aria-label="Ideas">
       <AddInput placeholder="Jot an idea…" ariaLabel="Jot an idea" onAdd={add} />
 
       {hasIdeas && (
