@@ -4,13 +4,11 @@ interface BrandProps {
   className?: string;
   /** Increase text size by 20% (used on auth screens). */
   large?: boolean;
-  /** Shrink text size (used in the app-shell header, which also holds nav tabs). */
-  small?: boolean;
 }
 
 /** The "jotdown" wordmark, optionally with the tagline. */
-export function Brand({ withTagline = false, className = '', large = false, small = false }: BrandProps) {
-  const textSize = large ? 'text-[1.65rem]' : small ? 'text-base' : 'text-2xl';
+export function Brand({ withTagline = false, className = '', large = false }: BrandProps) {
+  const textSize = large ? 'text-[1.65rem]' : 'text-2xl';
   const taglineGap = large ? 'mt-0' : 'mt-1';
   return (
     <div className={className}>
