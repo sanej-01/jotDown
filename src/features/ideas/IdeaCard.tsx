@@ -35,9 +35,13 @@ const BORDER_COLOR: Record<IdeaColor, string> = {
  */
 export function IdeaCard({ idea, onEditTitle, onEditNote, onEditColor, onDelete }: IdeaCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [titleEditing, setTitleEditing] = useState(false);
   const [note, setNote] = useState(idea.note);
 
   const color: IdeaColor = idea.color ?? 'yellow';
+  // Show the color picker whenever the card is being actively edited — either
+  // the title is focused or the note area is expanded — not just on note expand.
+  const showColorPicker = titleEditing || expanded;
 
   function saveNote() {
     if (note !== idea.note) onEditNote(idea.id, note);
@@ -55,45 +59,52 @@ export function IdeaCard({ idea, onEditTitle, onEditNote, onEditColor, onDelete 
           <EditableText
             value={idea.title}
             onSave={(title) => onEditTitle(idea.id, title)}
+            onEditingChange={setTitleEditing}
             multiline
             displayLines={2}
             editRows={5}
           />
 
           {expanded && (
-            <div className="mt-2">
-              <textarea
-                value={note}
-                maxLength={LIMITS.noteMax}
-                onChange={(e) => setNote(e.target.value)}
-                onBlur={saveNote}
-                placeholder="Add a note…"
-                rows={3}
-                className="w-full resize-y rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-content placeholder:text-content-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-              />
+            <textarea
+              value={note}
+              maxLength={LIMITS.noteMax}
+              onChange={(e) => setNote(e.target.value)}
+              onBlur={saveNote}
+              placeholder="Add a note…"
+              rows={3}
+              className="mt-2 w-full resize-y rounded-xl border border-border bg-canvas px-3 py-2 text-sm text-content placeholder:text-content-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            />
+          )}
 
-              {/* Color picker — 3 circles at bottom-right of the edit area.
-                  Clicking one immediately persists the color (optimistic update). */}
-              <div className="mt-2 flex justify-end gap-2">
-                {COLOR_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => onEditColor(idea.id, opt.value)}
-                    aria-label={`Set color ${opt.label}`}
-                    aria-pressed={color === opt.value}
-                    className={[
-                      'h-6 w-6 rounded-full transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-                      opt.bg,
-                      opt.ring,
-                      // Selected: slight scale-up + ring to indicate active state
-                      color === opt.value
-                        ? 'ring-2 ring-offset-2 scale-110'
-                        : 'opacity-60 hover:opacity-100 hover:scale-105',
-                    ].join(' ')}
-                  />
-                ))}
-              </div>
+          {/* Color picker — 3 circles at bottom-right of the edit area. Shown
+              while editing the title OR while the note is expanded, so the
+              picker is available as soon as the user starts editing the idea
+              at all (not gated behind expanding the note first). Clicking a
+              circle immediately persists the color (optimistic update). */}
+          {showColorPicker && (
+            <div className="mt-2 flex justify-end gap-2">
+              {COLOR_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  // onMouseDown (not onClick) fires before the title textarea's
+                  // blur/commit, so picking a color doesn't first close the editor.
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => onEditColor(idea.id, opt.value)}
+                  aria-label={`Set color ${opt.label}`}
+                  aria-pressed={color === opt.value}
+                  className={[
+                    'h-6 w-6 rounded-full transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                    opt.bg,
+                    opt.ring,
+                    // Selected: slight scale-up + ring to indicate active state
+                    color === opt.value
+                      ? 'ring-2 ring-offset-2 scale-110'
+                      : 'opacity-60 hover:opacity-100 hover:scale-105',
+                  ].join(' ')}
+                />
+              ))}
             </div>
           )}
 

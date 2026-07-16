@@ -20,6 +20,8 @@ interface EditableTextProps {
   displayLines?: 2 | 3 | 4;
   /** Textarea rows while editing; only used when multiline. */
   editRows?: number;
+  /** Notifies the parent when edit mode starts/stops (e.g. to show a color picker alongside). */
+  onEditingChange?: (editing: boolean) => void;
 }
 
 const lineClampClasses: Record<number, string> = {
@@ -42,6 +44,7 @@ export function EditableText({
   multiline = false,
   displayLines = 2,
   editRows = 5,
+  onEditingChange,
 }: EditableTextProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -61,18 +64,21 @@ export function EditableText({
     setDraft(value);
     cancelledRef.current = false;
     setEditing(true);
+    onEditingChange?.(true);
   }
 
   function commit() {
     const next = draft.trim();
     if (next && next !== value) onSave(next);
     setEditing(false);
+    onEditingChange?.(false);
   }
 
   function cancel() {
     cancelledRef.current = true;
     setDraft(value);
     setEditing(false);
+    onEditingChange?.(false);
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) {
